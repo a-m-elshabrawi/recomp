@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.local.example
 
 # vercel
 .vercel
@@ -39,3 +40,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+SETUP.md
+
+# editor
+.vscode/
+.idea/
+
+# scratch scripts (one-off verification/debug scripts created during
+# development, e.g. _tmp-test-gemini-key.mjs — always meant to be deleted
+# before committing, this is just a safety net in case one is missed)
+_tmp-*

@@ -1,26 +1,193 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * "Training ledger" design system — a lifter's logbook crossed with
+ * load-plate calibration markings. All-blue palette with a single amber
+ * exception reserved for off-target/warning states. This is a permanent
+ * dark theme (there is no light-mode toggle in this app) — :root and
+ * .dark intentionally hold identical values so the look stays consistent
+ * regardless of how either block ends up being applied.
+ */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans);
+  --font-display: var(--font-oswald);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Raw palette, exposed as utilities (bg-cobalt, text-steel-light, etc.)
+     for components that need the brand colors directly rather than via a
+     semantic slot. */
+  --color-ink: var(--ink);
+  --color-ink-lighter: var(--ink-lighter);
+  --color-steel: var(--steel);
+  --color-steel-light: var(--steel-light);
+  --color-steel-dark: var(--steel-dark);
+  --color-chalk: var(--chalk);
+  --color-chalk-muted: var(--chalk-muted);
+  --color-chalk-dim: var(--chalk-dim);
+  --color-cobalt: var(--cobalt);
+  --color-cobalt-light: var(--cobalt-light);
+  --color-cobalt-dark: var(--cobalt-dark);
+  --color-powder: var(--powder);
+  --color-powder-light: var(--powder-light);
+  --color-powder-dark: var(--powder-dark);
+  --color-amber: var(--amber);
+  --color-amber-light: var(--amber-light);
+  --color-amber-dark: var(--amber-dark);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root,
+.dark {
+  /* ---- Raw palette --------------------------------------------------- */
+  --ink: #0f1729;
+  --ink-lighter: #16213a;
+  --steel: #1c2a47;
+  --steel-light: #2a3d63;
+  --steel-dark: #142036;
+  --chalk: #e3e9f5;
+  --chalk-muted: #a9b7d1;
+  --chalk-dim: #7c8cad;
+  --cobalt: #2f6fed;
+  --cobalt-light: #5b8ff5;
+  --cobalt-dark: #1e4db8;
+  --powder: #7fa8d9;
+  --powder-light: #a8c4e8;
+  --powder-dark: #5c86bc;
+  /* The single non-blue exception in the palette — off-target/warning
+     states only (under-target nutrition, missed sessions, validation
+     errors). Never used for anything else. */
+  --amber: #d98e3c;
+  --amber-light: #e8ad6b;
+  --amber-dark: #b8721f;
+
+  /* ---- Semantic tokens (shadcn slots) ---------------------------------- */
+  --background: var(--ink);
+  --foreground: var(--chalk);
+  --card: var(--steel);
+  --card-foreground: var(--chalk);
+  --popover: var(--steel);
+  --popover-foreground: var(--chalk);
+  --primary: var(--cobalt);
+  --primary-foreground: var(--chalk);
+  --secondary: var(--steel-light);
+  --secondary-foreground: var(--chalk);
+  --muted: var(--steel);
+  --muted-foreground: var(--chalk-muted);
+  --accent: var(--steel-light);
+  --accent-foreground: var(--chalk);
+  /* Amber, not red — matches the palette's off-target/warning convention
+     for validation errors and destructive actions. */
+  --destructive: var(--amber);
+  --border: var(--steel-light);
+  --input: var(--steel-light);
+  --ring: var(--cobalt);
+  --chart-1: var(--cobalt);
+  --chart-2: var(--powder);
+  --chart-3: var(--cobalt-light);
+  --chart-4: var(--powder-light);
+  --chart-5: var(--steel-light);
+  --radius: 0.375rem;
+  --sidebar: var(--steel);
+  --sidebar-foreground: var(--chalk);
+  --sidebar-primary: var(--cobalt);
+  --sidebar-primary-foreground: var(--chalk);
+  --sidebar-accent: var(--steel-light);
+  --sidebar-accent-foreground: var(--chalk);
+  --sidebar-border: var(--steel-light);
+  --sidebar-ring: var(--cobalt);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+    /* Permanent dark theme — native controls (date pickers, scrollbars)
+       should render dark too, not just the app chrome. */
+    color-scheme: dark;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/*
+ * Type scale. Numeric data (weights, reps, streaks, stat figures) uses the
+ * condensed display face so it reads like stamped/calibrated markings;
+ * everything else stays on the humanist body sans. tabular-nums keeps
+ * digits aligned when values change.
+ */
+@layer components {
+  .stat-value {
+    @apply font-display text-3xl font-semibold tracking-tight text-foreground tabular-nums;
+  }
+  .stat-value-lg {
+    @apply font-display text-5xl font-semibold tracking-tight text-foreground tabular-nums;
+  }
+  .stat-value-sm {
+    @apply font-display text-xl font-semibold tracking-tight text-foreground tabular-nums;
+  }
+  .stat-label {
+    @apply text-xs font-medium tracking-wide text-muted-foreground uppercase;
+  }
+  .stat-caption {
+    @apply text-xs text-muted-foreground;
+  }
+}
+
+/* BarbellPlates fill micro-interaction — respects prefers-reduced-motion
+   via the motion-safe: variant applied at the call site, not here. */
+@keyframes plate-fill {
+  0% {
+    transform: scale(0.75);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
