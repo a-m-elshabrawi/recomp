@@ -189,6 +189,6 @@ export async function setSessionCompleted(
   // the change. logSet() intentionally skips this: individual set saves
   // don't affect any stat card, and autosaving on every blur should stay
   // snappy rather than round-tripping a full page re-render.
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   return { ok: true, data: { workoutLogId } };
 }

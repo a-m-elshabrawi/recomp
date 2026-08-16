@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sheet";
 
 const NAV_LINKS = [
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/logs", label: "Logs" },
   { href: "/progress", label: "Progress" },
   { href: "/coach", label: "Coach" },
@@ -39,7 +40,10 @@ export function AppNav({ userEmail }: { userEmail: string }) {
   return (
     <header className="border-b bg-background">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-        <Link href="/" className="text-lg font-semibold tracking-tight">
+        <Link
+          href="/dashboard"
+          className="text-lg font-semibold tracking-tight"
+        >
           Recomp
         </Link>
 

@@ -1,7 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = new Set(["/login", "/signup"]);
+// Routes viewable without a session. "/" is the public marketing landing
+// page; "/login" and "/signup" are the auth screens. Everything else
+// (/dashboard, /logs, /progress, /coach, /settings) requires auth.
+const PUBLIC_PATHS = new Set(["/", "/login", "/signup"]);
 
 /**
  * Refreshes the Supabase auth session on every request and enforces route
@@ -57,9 +60,14 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // An authenticated user has no reason to see a public-only page: the
+  // landing page is a pitch for logged-out visitors, and the auth screens
+  // are irrelevant once signed in. Send them straight to their dashboard.
+  // (This also means "/" redirects to "/dashboard" for signed-in users,
+  // which is the intended behavior for the landing page.)
   if (user && isPublicPath) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/dashboard";
     url.search = "";
     return NextResponse.redirect(url);
   }

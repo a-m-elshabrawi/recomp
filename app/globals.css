@@ -191,3 +191,91 @@
     transform: scale(1);
   }
 }
+
+/*
+ * Landing hero — the ambient "plate-rack" signature moment. A grid of load
+ * plates that light up cobalt in a slow diagonal wave, scaling up the same
+ * plate visual language the app uses for its "sessions this week"
+ * indicator (see components/training-ledger/barbell-plates.tsx).
+ *
+ * Motion lives entirely inside the prefers-reduced-motion:no-preference
+ * media query. When reduced motion is requested there is NO animation at
+ * all — the `.plate-cell--lit` cells stay statically filled, so the rack
+ * still reads as a deliberate composed graphic rather than an empty grid.
+ */
+.plate-disc {
+  fill: transparent;
+  stroke: var(--steel-light);
+  stroke-width: 1.5;
+}
+.plate-hub {
+  fill: var(--ink);
+  stroke: var(--steel-light);
+  stroke-width: 1;
+}
+.plate-cell--lit .plate-disc {
+  fill: var(--cobalt);
+  stroke: var(--cobalt-dark);
+}
+.plate-cell--lit .plate-hub {
+  stroke: var(--cobalt-dark);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .plate-cell .plate-disc {
+    animation: plate-rack-disc 7s ease-in-out infinite;
+    animation-delay: var(--plate-delay, 0s);
+  }
+  .plate-cell .plate-hub {
+    animation: plate-rack-hub 7s ease-in-out infinite;
+    animation-delay: var(--plate-delay, 0s);
+  }
+}
+
+@keyframes plate-rack-disc {
+  0%,
+  100% {
+    fill: transparent;
+    stroke: var(--steel-light);
+  }
+  18%,
+  46% {
+    fill: var(--cobalt);
+    stroke: var(--cobalt-dark);
+  }
+  64% {
+    fill: transparent;
+    stroke: var(--steel-light);
+  }
+}
+@keyframes plate-rack-hub {
+  0%,
+  100% {
+    stroke: var(--steel-light);
+  }
+  18%,
+  46% {
+    stroke: var(--cobalt-dark);
+  }
+  64% {
+    stroke: var(--steel-light);
+  }
+}
+
+/* Slow, barely-there drift of the whole rack — a breathing loaded bar.
+   Also gated behind no-preference so reduced motion holds it perfectly
+   still. */
+@media (prefers-reduced-motion: no-preference) {
+  .plate-rack-drift {
+    animation: plate-rack-drift 18s ease-in-out infinite;
+  }
+}
+@keyframes plate-rack-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1.25%);
+  }
+}
