@@ -116,7 +116,7 @@ export async function updateProfile(
 
   revalidatePath("/settings");
   revalidatePath("/coach");
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   return { ok: true, data: null };
 }
 

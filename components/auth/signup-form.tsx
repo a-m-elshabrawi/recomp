@@ -137,7 +137,7 @@ export function SignupForm() {
       }
     }
 
-    router.push("/");
+    router.push("/dashboard");
     router.refresh();
   }
 
