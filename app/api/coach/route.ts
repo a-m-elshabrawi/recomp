@@ -6,6 +6,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { buildCoachContext } from "@/lib/coach/context";
 import { deriveConversationTitle } from "@/lib/coach/title";
+import { isDemoUser } from "@/lib/demo";
 
 // Pinned per explicit request rather than the "-latest" alias. Note for
 // future-you: Gemini model versions do get deprecated/shut down over time
@@ -47,6 +48,25 @@ export async function POST(request: Request): Promise<NextResponse<CoachApiRespo
     return NextResponse.json(
       { ok: false, error: "Not signed in." },
       { status: 401 }
+    );
+  }
+
+  // The public demo account can read its seeded coach conversations but
+  // can't start new ones. Its credentials are in README.md, so anyone at
+  // all can sign into it — leaving live sends open would put an unmetered,
+  // unauthenticated hole straight through to the project's single Gemini
+  // key, and every message would also write into the demo's conversation
+  // list for the next visitor. Blocking here (rather than in the UI) is
+  // what actually enforces it, since the endpoint is reachable directly.
+  // Real accounts are unaffected.
+  if (isDemoUser(user.email)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "The demo account's coach is read-only. Open a saved conversation on the left to see how it responds using this account's real training history — or sign up for your own account to chat live.",
+      },
+      { status: 403 }
     );
   }
 

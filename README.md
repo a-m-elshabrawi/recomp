@@ -7,6 +7,32 @@ programme and history.
 **Status** Shipped, deployed for one user
 **Built** August 2026
 
+## Try it
+
+[recomp-three-theta.vercel.app](https://recomp-three-theta.vercel.app)
+
+There is a public demo account, so seeing the app does not require signing up for it.
+
+| | |
+|---|---|
+| Email | `demo@recomp.app` |
+| Password | `RecompDemo2026!` |
+
+Those credentials are meant to be public. The account owns nothing but generated data,
+and row level security scopes it to its own rows exactly as it does every other account.
+
+It holds twelve weeks of history: forty-one completed sessions across the four-day
+programme plus one half-logged session for today, seventy-eight daily weigh-ins trending
+84.8 kg down to 80.3 kg through a plateau in the middle, nutrition logs that track the
+target change six weeks in, and eleven weekly check-ins. Progress is the page worth opening
+— the weight trend, the twelve-week consistency bars and per-exercise strength progression
+all have enough behind them to have a shape.
+
+Two things behave differently on that account. Its data is editable, deliberately, so
+logging a set or a weigh-in works and sticks; `npm run seed:demo` puts it back. And the
+coach will show you its saved conversations but will not answer a new message, for reasons
+under [The demo account](#the-demo-account).
+
 ## Why this exists
 
 Every fitness app I tried wanted to be a social network, a marketplace, or a subscription.
@@ -58,6 +84,12 @@ and get an answer grounded in your own logs.
 6. **Email confirmation is deliberately off.** New signups do not verify an address. This
    is the one setting configured for solo use rather than public launch, and it is a
    one-toggle change if that ever stops being true.
+
+7. **The demo account is the only account the coach refuses.** `/api/coach` returns 403 for
+   it before reaching Gemini. Its credentials are public, so an open endpoint would be an
+   unmetered path to a single API key, and every visitor's messages would accumulate in the
+   next visitor's conversation list. The check is in the route handler rather than the UI
+   because the endpoint is reachable without it.
 
 ## Data model
 
@@ -114,6 +146,40 @@ Run `supabase/schema.sql` once against a fresh project. If the database already 
 run the files in `supabase/migrations/` instead. There is a comment at the top of
 `schema.sql` explaining which applies.
 
+## The demo account
+
+```bash
+npm run seed:demo                                       # create or reset it
+psql "$SUPABASE_DB_URL" -f scripts/verify-demo-rls.sql  # prove it is isolated
+```
+
+`scripts/seed-demo.mjs` is built to be re-run rather than run once. The credentials are
+public and row level security lets the account edit its own rows, so visitors changing
+things is the expected case, not the failure case. Each run deletes every row the demo user
+owns across all twelve tables and rebuilds them, and re-anchors every date to the day it
+runs, which is also what keeps the data from ageing into a dashboard whose last workout was
+months ago. A fixed-seed PRNG makes two runs on the same day identical. It filters every
+delete by the one user id and needs the service-role key, which is why it is a local script
+rather than anything the deployed app can reach.
+
+`scripts/verify-demo-rls.sql` exercises the policies rather than reading them. It inserts a
+fixture row for a real second account in every table, switches the session to the
+`authenticated` role with the demo user's id in `request.jwt.claims` — what PostgREST does
+for a logged-in session, and enough to drop the `postgres` role's `BYPASSRLS` — and then
+tries to read, update, delete and insert against those rows by primary key. Reading by known
+id is the part that matters: a join-based test returns zero rows even under a broken policy,
+because the parent row is hidden too. It also asserts the demo account still sees all of its
+own rows, so the result cannot be explained by a policy that denies everything to everyone.
+The whole thing runs in a transaction that ends in `ROLLBACK`.
+
+The coach is the one feature a demo account cannot show honestly by doing nothing, because
+it is grounded in the signed-in user's own history and an empty chat page would misrepresent
+it. So the account gets both halves: three seeded conversations, written against the numbers
+the seeder actually generates rather than invented ones, and a refusal on new messages for
+the reason in design decision 7. The account email is hardcoded in `lib/demo.ts` rather than
+read from an environment variable, since it is not a secret and hardcoding means local dev,
+previews and production behave the same with nothing to wire up.
+
 ## Project structure
 
 ```
@@ -133,6 +199,9 @@ lib/
 supabase/
   schema.sql        Full current schema, for a fresh project
   migrations/       Incremental changes, for a database with data
+scripts/
+  seed-demo.mjs     Creates and resets the public demo account
+  verify-demo-rls.sql  Proves that account cannot reach any other account's rows
 middleware.ts       Route protection and session refresh. Excludes /api
 ```
 
